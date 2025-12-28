@@ -34,11 +34,35 @@ function generateTrackingId(): string {
   return `ORD-${timestamp}-${random}`.toUpperCase();
 }
 
+async function getOrCreateCustomerProfile(phone: string, customerName: string): Promise<number> {
+  const existing = await db.queryRow<{ id: number }>`
+    SELECT id FROM customer_profiles WHERE phone = ${phone}
+  `;
+
+  if (existing) {
+    return existing.id;
+  }
+
+  const newProfile = await db.queryRow<{ id: number }>`
+    INSERT INTO customer_profiles (phone, customer_name)
+    VALUES (${phone}, ${customerName})
+    RETURNING id
+  `;
+
+  if (!newProfile) {
+    throw new Error("Failed to create customer profile");
+  }
+
+  return newProfile.id;
+}
+
 export const create = api(
   { method: "POST", path: "/orders", expose: true },
   async (req: CreateOrderRequest): Promise<CreateOrderResponse> => {
     const trackingId = generateTrackingId();
     const paystackReference = `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+    const customerProfileId = await getOrCreateCustomerProfile(req.phone, req.customerName);
 
     const orderRow = await db.queryRow<{ id: number }>`
       INSERT INTO orders (
@@ -50,7 +74,8 @@ export const create = api(
         total,
         payment_status,
         payment_reference,
-        order_status
+        order_status,
+        customer_profile_id
       ) VALUES (
         ${trackingId},
         ${req.customerName},
@@ -60,7 +85,8 @@ export const create = api(
         ${req.total},
         'pending',
         ${paystackReference},
-        'pending_payment'
+        'pending_payment',
+        ${customerProfileId}
       )
       RETURNING id
     `;

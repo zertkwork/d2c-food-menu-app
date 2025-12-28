@@ -6,6 +6,7 @@ import MagicCart from "./components/MagicCart";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import KitchenDisplayPage from "./pages/KitchenDisplayPage";
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
               <Route path="/track-order/:trackingId" element={<OrderTrackingPage />} />
+              <Route path="/order-history" element={<OrderHistoryPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route
                 path="/admin"

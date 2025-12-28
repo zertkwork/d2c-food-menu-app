@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import backend from "~backend/client";
 import type { MenuItem } from "~backend/menu/list";
 import MenuItemCard from "./MenuItemCard";
 import { useCart, useCartActions } from "../contexts/CartContext";
+import { History } from "lucide-react";
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
   const { totalItems, isOpen } = useCart();
   const { openCart } = useCartActions();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadMenu();
@@ -34,11 +39,49 @@ export default function MenuPage() {
     );
   }
 
+  const handleViewHistory = () => {
+    if (phoneNumber.trim()) {
+      navigate(`/order-history?phone=${encodeURIComponent(phoneNumber)}`);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-[#2C2C2C] mb-2">Menu</h1>
         <p className="text-gray-500">Simple, fresh, delicious</p>
+        
+        <div className="mt-4">
+          {!showPhoneInput ? (
+            <button
+              onClick={() => setShowPhoneInput(true)}
+              className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium transition-colors"
+            >
+              <History className="w-4 h-4" />
+              View Order History
+            </button>
+          ) : (
+            <div className="flex gap-2 max-w-sm mx-auto">
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter your phone number"
+                className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleViewHistory();
+                }}
+              />
+              <button
+                onClick={handleViewHistory}
+                disabled={!phoneNumber.trim()}
+                className="px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Go
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="space-y-6">

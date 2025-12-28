@@ -51,14 +51,25 @@ export const webhook = api(
           phone: string;
           delivery_address: string;
           total: number;
+          customer_profile_id: number | null;
         }>`
           UPDATE orders
-          SET payment_status = 'paid', order_status = 'received'
+          SET payment_status = 'completed', order_status = 'received'
           WHERE payment_reference = ${reference}
-          RETURNING id, tracking_id, customer_name, phone, delivery_address, total
+          RETURNING id, tracking_id, customer_name, phone, delivery_address, total, customer_profile_id
         `;
 
         if (orderRow) {
+          if (orderRow.customer_profile_id) {
+            await db.exec`
+              UPDATE customer_profiles
+              SET 
+                total_orders = total_orders + 1,
+                total_spent = total_spent + ${orderRow.total},
+                last_order_at = NOW()
+              WHERE id = ${orderRow.customer_profile_id}
+            `;
+          }
           const itemsResult = [];
           for await (const item of db.query<{
             menu_item_name: string;
