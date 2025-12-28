@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Package, Menu, BarChart3, LogOut } from "lucide-react";
+import { Package, Menu, BarChart3, LogOut, BoxIcon, Users } from "lucide-react";
 import OrdersTab from "../components/admin/OrdersTab";
 import MenuManagementTab from "../components/admin/MenuManagementTab";
 import ReportsTab from "../components/admin/ReportsTab";
+import InventoryTab from "../components/admin/InventoryTab";
+import CustomersTab from "../components/admin/CustomersTab";
 
-type Tab = "orders" | "menu" | "reports";
+type Tab = "orders" | "menu" | "reports" | "inventory" | "customers";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("orders");
@@ -21,7 +23,9 @@ export default function AdminDashboard() {
   const tabs = [
     { id: "orders" as Tab, label: "Orders", icon: Package },
     { id: "menu" as Tab, label: "Menu", icon: Menu },
-    { id: "reports" as Tab, label: "Reports", icon: BarChart3 },
+    { id: "inventory" as Tab, label: "Inventory", icon: BoxIcon },
+    { id: "customers" as Tab, label: "Customers", icon: Users },
+    { id: "reports" as Tab, label: "Analytics", icon: BarChart3 },
   ];
 
   return (
@@ -61,6 +65,8 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {activeTab === "orders" && <OrdersTab />}
         {activeTab === "menu" && <MenuManagementTab />}
+        {activeTab === "inventory" && <InventoryTab />}
+        {activeTab === "customers" && <CustomersTab />}
         {activeTab === "reports" && <ReportsTab />}
       </main>
     </div>
