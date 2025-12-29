@@ -82,7 +82,7 @@ encore auth login
 Add Encore's git remote to enable direct deployment:
 
 ```bash
-git remote add encore encore://d2c-food-menu-app-ssmi
+git remote add encore encore://leap-app-2a5i
 ```
 
 #### Step 3: Deploy Your Application
@@ -95,7 +95,7 @@ git commit -m "Deploy to Encore Cloud"
 git push encore
 ```
 
-Monitor your deployment progress in the [Encore Cloud dashboard](https://app.encore.dev/d2c-food-menu-app-ssmi/deploys).
+Monitor your deployment progress in the [Encore Cloud dashboard](https://app.encore.dev/leap-app-2a5i/deploys).
 
 ## GitHub Integration (Recommended for Production)
 
@@ -104,7 +104,7 @@ For production applications, we recommend integrating with GitHub instead of usi
 ### Connecting Your GitHub Account
 
 1. Open your app in the **Encore Cloud dashboard**
-2. Navigate to Encore Cloud [GitHub Integration settings](https://app.encore.cloud/d2c-food-menu-app-ssmi/settings/integrations/github)
+2. Navigate to Encore Cloud [GitHub Integration settings](https://app.encore.cloud/leap-app-2a5i/settings/integrations/github)
 3. Click **Connect Account to GitHub**
 4. Grant access to your repository
 

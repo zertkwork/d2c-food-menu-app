@@ -35,6 +35,7 @@ const BROWSER = typeof globalThis === "object" && ("window" in globalThis);
 export class Client {
     public readonly admin: admin.ServiceClient
     public readonly auth: auth.ServiceClient
+    public readonly customer: customer.ServiceClient
     public readonly delivery: delivery.ServiceClient
     public readonly kitchen: kitchen.ServiceClient
     public readonly menu: menu.ServiceClient
@@ -55,6 +56,7 @@ export class Client {
         const base = new BaseClient(this.target, this.options)
         this.admin = new admin.ServiceClient(base)
         this.auth = new auth.ServiceClient(base)
+        this.customer = new customer.ServiceClient(base)
         this.delivery = new delivery.ServiceClient(base)
         this.kitchen = new kitchen.ServiceClient(base)
         this.menu = new menu.ServiceClient(base)
@@ -320,6 +322,29 @@ export namespace auth {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/auth/setup`, {method: "POST", body: JSON.stringify(params)})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_setup_setup>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { getOrderHistory as api_customer_get_order_history_getOrderHistory } from "~backend/customer/get_order_history";
+
+export namespace customer {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.getOrderHistory = this.getOrderHistory.bind(this)
+        }
+
+        public async getOrderHistory(params: { phone: string }): Promise<ResponseType<typeof api_customer_get_order_history_getOrderHistory>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/customer/order-history/${encodeURIComponent(params.phone)}`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_customer_get_order_history_getOrderHistory>
         }
     }
 }
