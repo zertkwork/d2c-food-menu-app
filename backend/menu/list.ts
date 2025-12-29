@@ -1,5 +1,5 @@
 import { api } from "encore.dev/api";
-import db from "../db";
+import { listAvailableMenuItems } from "../core/menu/service";
 
 export interface MenuItem {
   id: number;
@@ -18,29 +18,7 @@ interface ListMenuResponse {
 export const list = api<void, ListMenuResponse>(
   { expose: true, method: "GET", path: "/menu" },
   async () => {
-    const rows = await db.queryAll<{
-      id: number;
-      name: string;
-      description: string;
-      price: number;
-      image_url: string;
-      available: boolean;
-    }>`
-      SELECT id, name, description, price, image_url, available
-      FROM menu_items
-      WHERE available = true
-      ORDER BY id ASC
-    `;
-
-    const items = rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      price: row.price,
-      imageUrl: row.image_url,
-      available: row.available,
-    }));
-
+    const items = await listAvailableMenuItems();
     return { items };
   }
 );

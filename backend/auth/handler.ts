@@ -1,6 +1,6 @@
-import { Header, Cookie, APIError, Gateway } from "encore.dev/api";
+import { Header, Cookie, Gateway, APIError } from "encore.dev/api";
 import { authHandler } from "encore.dev/auth";
-import db from "../db";
+import { authService, AuthServiceError } from "../core/auth/auth_service";
 
 interface AuthParams {
   authorization?: Header<"Authorization">;
@@ -15,48 +15,23 @@ export interface AuthData {
 
 export const auth = authHandler<AuthParams, AuthData>(
   async (params) => {
-    const token = params.authorization?.replace("Bearer ", "") ?? params.session;
-    
-    if (!token) {
-      throw APIError.unauthenticated("missing authentication token");
+    try {
+      const result = await authService({
+        authorization: params.authorization as any,
+        session: params.session as any,
+      });
+      return result;
+    } catch (err) {
+      if (err instanceof AuthServiceError) {
+        if (err.code === "unauthenticated") {
+          throw APIError.unauthenticated(err.message);
+        }
+        if (err.code === "permission_denied") {
+          throw APIError.permissionDenied(err.message);
+        }
+      }
+      throw err;
     }
-
-    const result = await db.queryRow<{
-      user_id: number;
-      username: string;
-      role: "admin" | "kitchen" | "delivery";
-      expires_at: Date;
-      is_active: boolean;
-    }>`
-      SELECT 
-        s.user_id,
-        u.username,
-        u.role,
-        s.expires_at,
-        u.is_active
-      FROM sessions s
-      JOIN users u ON s.user_id = u.id
-      WHERE s.token = ${token}
-    `;
-
-    if (!result) {
-      throw APIError.unauthenticated("invalid or expired session");
-    }
-
-    if (!result.is_active) {
-      throw APIError.permissionDenied("user account is deactivated");
-    }
-
-    if (new Date() > result.expires_at) {
-      await db.exec`DELETE FROM sessions WHERE token = ${token}`;
-      throw APIError.unauthenticated("session expired");
-    }
-
-    return {
-      userID: result.user_id.toString(),
-      username: result.username,
-      role: result.role,
-    };
   }
 );
 
