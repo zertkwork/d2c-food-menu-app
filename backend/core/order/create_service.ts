@@ -1,6 +1,6 @@
 import db from "../../db";
 
-interface OrderItem {
+export interface OrderItem {
   menuItemId: number;
   menuItemName: string;
   quantity: number;
@@ -8,7 +8,7 @@ interface OrderItem {
   total: number;
 }
 
-interface CreateOrderRequest {
+export interface CreateOrderRequest {
   customerName: string;
   phone: string;
   deliveryAddress: string;
@@ -17,7 +17,7 @@ interface CreateOrderRequest {
   total: number;
 }
 
-interface CreateOrderResponse {
+export interface CreateOrderResponse {
   orderId: number;
   trackingId: string;
   paystackAuthUrl: string;
