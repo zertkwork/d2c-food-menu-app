@@ -30,6 +30,9 @@ export interface CreateOrderResponse {
 import db from "../db";
 
 export async function create(req: CreateOrderRequest): Promise<CreateOrderResponse> {
-    return await createOrderService(req, (() => { const v = process.env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })(), db);
-  }
+  const paystackSecret = (() => { const v = process.env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })();
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:8080';
+  const paymentMode = process.env.PAYMENT_MODE;
+  return await createOrderService(req, paystackSecret, db, frontendUrl, paymentMode);
+}
 

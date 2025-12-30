@@ -1,4 +1,4 @@
-import type { DBPort } from "../db/port.ts";
+import type { DBPort } from "../db/port";
 
 export interface OrderItem {
   menuItemId: number;
@@ -52,9 +52,15 @@ async function getOrCreateCustomerProfile(db: DBPort, phone: string, customerNam
   return newProfile.id;
 }
 
-export async function createOrderService(req: CreateOrderRequest, paystackSecret: string, db: DBPort): Promise<CreateOrderResponse> {
+export async function createOrderService(
+  req: CreateOrderRequest,
+  paystackSecret: string,
+  db: DBPort,
+  frontendUrl: string,
+  paymentModeEnv?: string
+): Promise<CreateOrderResponse> {
   const trackingId = generateTrackingId();
-  const paymentMode = (process.env.PAYMENT_MODE || '').toLowerCase() === 'stub' ? 'stub' : 'live';
+  const paymentMode = (paymentModeEnv || '').toLowerCase() === 'stub' ? 'stub' : 'live';
   const paystackReference = paymentMode === 'stub'
     ? `stub_ref_${Date.now()}`
     : `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -120,7 +126,6 @@ export async function createOrderService(req: CreateOrderRequest, paystackSecret
       paystackReference,
     };
   }
-
   const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
     headers: {
@@ -131,7 +136,7 @@ export async function createOrderService(req: CreateOrderRequest, paystackSecret
       email: "customer@example.com",
       amount: Math.round(req.total * 100),
       reference: paystackReference,
-      callback_url: `${process.env.FRONTEND_URL || "https://proj-d411cgs82vjh7nmv7am0.lp.dev"}/track-order/${trackingId}`,
+      callback_url: `${frontendUrl}/track-order/${trackingId}`,
       metadata: {
         orderId: orderRow.id,
         trackingId,

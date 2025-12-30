@@ -1,6 +1,6 @@
 import express from 'express';
 // Import types via type-only import to avoid ESM runtime resolution
-import type { CreateOrderRequest } from '../../core/order/create_service.ts';
+import type { CreateOrderRequest } from '../../core/order/create_service';
 
 import { validate } from './middlewares/validate.middleware';
 import { createOrderSchema } from './validators/createOrder.schema';
@@ -21,22 +21,22 @@ app.post('/orders', validate(createOrderSchema), async (req: any, res: any, next
   try {
     const body: CreateOrderRequest = req.body;
 
-    // TEMP: Adapter stub mode to boot without Encore/db runtime during migration.
-    if (process.env.ADAPTER_STUB_DB === 'true') {
-      return res.status(503).json({ error: 'Adapter stub mode: core/db not available' });
-    }
-
-    const paystackSecret = process.env.PAYSTACK_SECRET_KEY || '';
+    // Lazy import to avoid resolving core/db at import time
+    const { createOrderService } = await import('../../core/order/create_service.ts');
+    // Secrets are enforced via env at boundary
+    const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
     if (!paystackSecret) {
       throw new Error('Missing PAYSTACK_SECRET_KEY');
     }
 
-  // Lazy import to avoid resolving core/db when stub mode is enabled
-  const { createOrderService } = await import('../../core/order/create_service.ts');
-  // Adapter provides DB implementation to core; import lazily to honor ADAPTER_STUB_DB
-  const db = (await import('../../db/index.ts')).default;
+    // Lazy import DB adapter to avoid creating a DB connection at module import time
+    const db = (await import('../../db/index.ts')).default;
 
-  const result = await createOrderService(body, paystackSecret, db);
+    // Pass adapter-level runtime values (frontend URL and payment mode) into core
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:8080';
+    const paymentMode = process.env.PAYMENT_MODE;
+
+    const result = await createOrderService(body, paystackSecret, db, frontendUrl, paymentMode);
     res.json(result);
   } catch (err) {
     return next(err);
@@ -75,8 +75,8 @@ app.get('/auth/me', authMiddleware, async (req: any, res: any, next: any) => {
     const result = await me();
     res.json(result);
   } catch (err: any) {
-    if (err?.name === 'AuthServiceError') {
-      err.status = 401;
+    if ((err as any)?.name === 'AuthServiceError') {
+      (err as any).status = 401;
     }
     return next(err);
   }
