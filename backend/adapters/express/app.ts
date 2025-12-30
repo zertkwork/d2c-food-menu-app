@@ -1,5 +1,5 @@
 import express from 'express';
-import { createOrderService, CreateOrderRequest } from '../../core/order/create_service';
+import { createOrderService, CreateOrderRequest } from '../../core/order/create_service.ts';
 
 const app = express();
 app.use(express.json());
