@@ -4,12 +4,12 @@ import type { CreateOrderRequest } from '../../core/order/create_service';
 import { validate } from './middlewares/validate.middleware';
 import { createOrderSchema } from './validators/createOrder.schema';
 import { loginSchema } from './validators/login.schema';
+import { authMiddleware } from './middlewares/auth.middleware';
 
 const app: any = express();
 app.use(express.json());
 
 // Auth parity: protect previously-authenticated route groups
-import { authMiddleware } from './middlewares/auth.middleware';
 app.use('/admin', authMiddleware);
 app.use('/kitchen', authMiddleware);
 app.use('/delivery', authMiddleware);
@@ -65,7 +65,7 @@ app.get('/menu', async (req: any, res: any, next: any) => {
     const items = await listAvailableMenuItems();
     res.json({ items });
   } catch (err: any) {
-    return (req as any).next?.(err) ?? (err && (app as any)._router && (app as any)._router.handle && (app as any)._router.handle(req, res, (e: any) => {}));
+    return next(err);
   }
 });
 
