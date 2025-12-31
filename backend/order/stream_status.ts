@@ -1,5 +1,4 @@
-import { api, StreamOut } from "encore.dev/api";
-import { Subscription } from "encore.dev/pubsub";
+// Encore runtime removed
 import { orderStatusChangedTopic, kitchenStatusChangedTopic, deliveryStatusChangedTopic } from "../events/topics";
 
 interface OrderStatusUpdate {
@@ -14,9 +13,9 @@ interface StreamStatusRequest {
   trackingId: string;
 }
 
-const streamsByTrackingId: Map<string, Set<StreamOut<OrderStatusUpdate>>> = new Map();
+const streamsByTrackingId: Map<string, Set<any>> = new Map();
 
-new Subscription(orderStatusChangedTopic, "notify-customer-status", {
+/* Subscription removed: notify-customer-status {
   handler: async (event) => {
     const streams = streamsByTrackingId.get(event.trackingId);
     if (!streams) return;
@@ -35,9 +34,9 @@ new Subscription(orderStatusChangedTopic, "notify-customer-status", {
       }
     }
   },
-});
+*/
 
-new Subscription(kitchenStatusChangedTopic, "notify-customer-kitchen", {
+/* Subscription removed: notify-customer-kitchen {
   handler: async (event) => {
     const streams = streamsByTrackingId.get(event.trackingId);
     if (!streams) return;
@@ -57,9 +56,9 @@ new Subscription(kitchenStatusChangedTopic, "notify-customer-kitchen", {
       }
     }
   },
-});
+*/
 
-new Subscription(deliveryStatusChangedTopic, "notify-customer-delivery", {
+/* Subscription removed: notify-customer-delivery {
   handler: async (event) => {
     const streams = streamsByTrackingId.get(event.trackingId);
     if (!streams) return;
@@ -79,11 +78,9 @@ new Subscription(deliveryStatusChangedTopic, "notify-customer-delivery", {
       }
     }
   },
-});
+*/
 
-export const streamStatus = api.streamOut<StreamStatusRequest, OrderStatusUpdate>(
-  { expose: true, path: "/orders/:trackingId/stream" },
-  async (handshake, stream) => {
+export async function streamStatus(handshake: { trackingId: string }, stream: any): Promise<void> {
     const trackingId = handshake.trackingId;
     
     if (!streamsByTrackingId.has(trackingId)) {
@@ -109,4 +106,4 @@ export const streamStatus = api.streamOut<StreamStatusRequest, OrderStatusUpdate
       }
     }
   }
-);
+

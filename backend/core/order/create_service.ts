@@ -1,4 +1,4 @@
-import db from "../../db/index.ts";
+import type { DBPort } from "../db/port.ts";
 
 export interface OrderItem {
   menuItemId: number;
@@ -30,7 +30,7 @@ function generateTrackingId(): string {
   return `ORD-${timestamp}-${random}`.toUpperCase();
 }
 
-async function getOrCreateCustomerProfile(phone: string, customerName: string): Promise<number> {
+async function getOrCreateCustomerProfile(db: DBPort, phone: string, customerName: string): Promise<number> {
   const existing = await db.queryRow<{ id: number }>`
     SELECT id FROM customer_profiles WHERE phone = ${phone}
   `;
@@ -52,11 +52,14 @@ async function getOrCreateCustomerProfile(phone: string, customerName: string): 
   return newProfile.id;
 }
 
-export async function createOrderService(req: CreateOrderRequest, paystackSecret: string): Promise<CreateOrderResponse> {
+export async function createOrderService(req: CreateOrderRequest, paystackSecret: string, db: DBPort): Promise<CreateOrderResponse> {
   const trackingId = generateTrackingId();
-  const paystackReference = `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const paymentMode = (process.env.PAYMENT_MODE || '').toLowerCase() === 'stub' ? 'stub' : 'live';
+  const paystackReference = paymentMode === 'stub'
+    ? `stub_ref_${Date.now()}`
+    : `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-  const customerProfileId = await getOrCreateCustomerProfile(req.phone, req.customerName);
+  const customerProfileId = await getOrCreateCustomerProfile(db, req.phone, req.customerName);
 
   const orderRow = await db.queryRow<{ id: number }>`
       INSERT INTO orders (
@@ -107,6 +110,15 @@ export async function createOrderService(req: CreateOrderRequest, paystackSecret
           ${item.total}
         )
       `;
+  }
+
+  if (paymentMode === 'stub') {
+    return {
+      orderId: orderRow.id,
+      trackingId,
+      paystackAuthUrl: 'http://localhost/stub-pay',
+      paystackReference,
+    };
   }
 
   const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {

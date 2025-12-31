@@ -1,5 +1,4 @@
-import { api } from "encore.dev/api";
-import { secret } from "encore.dev/config";
+// Encore runtime removed
 import { createOrderService } from "../core/order/create_service";
 
 export interface OrderItem {
@@ -26,11 +25,11 @@ export interface CreateOrderResponse {
   paystackReference: string;
 }
 
-const paystackSecretKey = secret("PaystackSecretKey");
+// Secrets via env only; Encore config removed
 
-export const create = api(
-  { method: "POST", path: "/orders", expose: true },
-  async (req: CreateOrderRequest): Promise<CreateOrderResponse> => {
-    return await createOrderService(req, paystackSecretKey());
+import db from "../db";
+
+export async function create(req: CreateOrderRequest): Promise<CreateOrderResponse> {
+    return await createOrderService(req, (() => { const v = process.env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })(), db);
   }
-);
+

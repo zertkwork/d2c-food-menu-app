@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -10,9 +10,7 @@ export interface Analytics {
   mostOrderedItem: string;
 }
 
-export const getAnalytics = api<void, Analytics>(
-  { expose: true, method: "GET", path: "/admin/analytics", auth: true },
-  async () => {
+export async function getAnalytics(): Promise<Analytics> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -65,4 +63,4 @@ export const getAnalytics = api<void, Analytics>(
       mostOrderedItem: mostOrderedResult?.menu_item_name || "N/A",
     };
   }
-);
+

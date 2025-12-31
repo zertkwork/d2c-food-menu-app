@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 import { kitchenStatusChangedTopic } from "../events/topics";
@@ -12,9 +12,7 @@ export interface UpdateKitchenStatusResponse {
   success: boolean;
 }
 
-export const updateStatus = api(
-  { expose: true, method: "POST", path: "/kitchen/orders/:orderId/status", auth: true },
-  async (req: UpdateKitchenStatusRequest): Promise<UpdateKitchenStatusResponse> => {
+export async function updateStatus(req: UpdateKitchenStatusRequest): Promise<UpdateKitchenStatusResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "kitchen" && authData.role !== "admin") {
       throw new Error("Unauthorized: Kitchen or admin access required");
@@ -52,4 +50,4 @@ export const updateStatus = api(
 
     return { success: true };
   }
-);
+

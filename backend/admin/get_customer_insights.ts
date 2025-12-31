@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -29,9 +29,7 @@ interface GetCustomerInsightsResponse {
   segments: CustomerSegment[];
 }
 
-export const getCustomerInsights = api<void, GetCustomerInsightsResponse>(
-  { expose: true, method: "GET", path: "/admin/analytics/customer-insights", auth: true },
-  async () => {
+export async function getCustomerInsights(): Promise<GetCustomerInsightsResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -157,4 +155,4 @@ export const getCustomerInsights = api<void, GetCustomerInsightsResponse>(
       segments,
     };
   }
-);
+

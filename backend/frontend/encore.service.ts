@@ -1,13 +1,11 @@
 
-import { api } from "encore.dev/api";
-import { Service } from "encore.dev/service";
+// Encore Service removed at runtime
+export default {} as unknown as { name?: string };
 
-export default new Service("frontend");
-
-export const assets = api.static({
+/* export const assets = api.static({
   path: "/frontend/*path",
   expose: true,
   dir: "./dist",
   notFound: "./dist/index.html",
   notFoundStatus: 200,
-});
+}); */

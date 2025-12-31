@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 
 export interface UserInfo {
@@ -7,9 +7,7 @@ export interface UserInfo {
   role: string;
 }
 
-export const me = api<void, UserInfo>(
-  { method: "GET", path: "/auth/me", expose: true, auth: true },
-  async () => {
+export async function me(): Promise<UserInfo> {
     const authData = getAuthData()!;
     return {
       id: authData.userID,
@@ -17,4 +15,4 @@ export const me = api<void, UserInfo>(
       role: authData.role,
     };
   }
-);
+

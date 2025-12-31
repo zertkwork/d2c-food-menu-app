@@ -1,6 +1,4 @@
-import { api, StreamOut } from "encore.dev/api";
 import { getAuthData } from "~encore/auth";
-import { Subscription } from "encore.dev/pubsub";
 import { orderCreatedTopic, kitchenStatusChangedTopic } from "../events/topics";
 import db from "../db";
 
@@ -19,9 +17,10 @@ interface KitchenOrderUpdate {
   estimatedDeliveryMinutes: number;
 }
 
-const connectedStreams: Set<StreamOut<KitchenOrderUpdate>> = new Set();
+const connectedStreams: Set<any> = new Set();
 
-new Subscription(orderCreatedTopic, "notify-kitchen-new-order", {
+/* Subscription removed: notify-kitchen-new-order {
+
   handler: async (event) => {
     const itemsResult = [];
     for await (const item of db.query<{
@@ -58,9 +57,9 @@ new Subscription(orderCreatedTopic, "notify-kitchen-new-order", {
       }
     }
   },
-});
+*/
 
-new Subscription(kitchenStatusChangedTopic, "notify-kitchen-status-change", {
+/* Subscription removed: notify-kitchen-status-change {
   handler: async (event) => {
     const orderRow = await db.queryRow<{
       customer_name: string;
@@ -94,11 +93,9 @@ new Subscription(kitchenStatusChangedTopic, "notify-kitchen-status-change", {
       }
     }
   },
-});
+*/
 
-export const streamOrders = api.streamOut<KitchenOrderUpdate>(
-  { expose: true, path: "/kitchen/stream", auth: true },
-  async (stream) => {
+export async function streamOrders(stream: any): Promise<void> {
     const authData = getAuthData()!;
     if (authData.role !== "kitchen" && authData.role !== "admin") {
       throw new Error("Unauthorized: Kitchen or admin access required");
@@ -173,4 +170,4 @@ export const streamOrders = api.streamOut<KitchenOrderUpdate>(
       connectedStreams.delete(stream);
     }
   }
-);
+

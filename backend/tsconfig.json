@@ -27,5 +27,6 @@
 		/* Advanced Options */
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true
-	}
+	},
+	"exclude": ["encore.gen", "./encore.gen/**"]
 }
