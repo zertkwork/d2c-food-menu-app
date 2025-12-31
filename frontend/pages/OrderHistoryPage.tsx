@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { OrderHistoryItem } from "~backend/customer/get_order_history";
 import { useCart } from "../contexts/CartContext";
 import { toast } from "@/components/ui/use-toast";
@@ -28,7 +28,10 @@ export default function OrderHistoryPage() {
   const fetchOrderHistory = async () => {
     try {
       setLoading(true);
-      const response = await backend.customer.getOrderHistory({ phone });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/customer/order-history/${encodeURIComponent(phone)}`);
+      if (!resp.ok) throw new Error(`Failed to fetch: ${resp.status}`);
+      const response = await resp.json();
       setOrders(response.orders);
       setTotalOrders(response.totalOrders);
       setTotalSpent(response.totalSpent);
@@ -48,8 +51,11 @@ export default function OrderHistoryPage() {
     try {
       clearCart();
       
-      const menuResponse = await backend.menu.list();
-      const availableItems = new Map(menuResponse.items.map(item => [item.id, item]));
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const menuResp = await fetch(`${baseUrl}/menu`);
+      if (!menuResp.ok) throw new Error(`Failed to fetch menu: ${menuResp.status}`);
+      const menuResponse = (await menuResp.json()) as { items: import("~backend/menu/list").MenuItem[] };
+      const availableItems = new Map<number, import("~backend/menu/list").MenuItem>(menuResponse.items.map((item: import("~backend/menu/list").MenuItem) => [item.id, item]));
 
       let itemsAdded = 0;
       let itemsUnavailable = 0;

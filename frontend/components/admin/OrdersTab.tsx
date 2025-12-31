@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { AdminOrder } from "~backend/admin/list_orders";
 import { Phone, MapPin, Clock, CheckCircle2, ChefHat, Package } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,7 +21,10 @@ export default function OrdersTab() {
 
   const fetchOrders = async () => {
     try {
-      const response = await backend.admin.listOrders();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/orders`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const response = await resp.json();
       setOrders(response.orders);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
@@ -43,7 +46,14 @@ export default function OrdersTab() {
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
-      await backend.admin.updateOrderStatus({ orderId, status: newStatus });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/orders/${orderId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       await fetchOrders();
       toast({
         title: "Success",

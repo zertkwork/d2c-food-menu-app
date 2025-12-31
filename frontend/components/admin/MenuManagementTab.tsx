@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { MenuItem } from "~backend/admin/list_all_menu";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -10,7 +10,10 @@ export default function MenuManagementTab() {
 
   const fetchMenu = async () => {
     try {
-      const response = await backend.admin.listAllMenu();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/menu`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const response = await resp.json();
       setMenuItems(response.items);
     } catch (error) {
       console.error("Failed to fetch menu:", error);
@@ -30,10 +33,14 @@ export default function MenuManagementTab() {
 
   const toggleAvailability = async (menuItemId: number, currentAvailable: boolean) => {
     try {
-      await backend.admin.toggleAvailability({
-        menuItemId,
-        available: !currentAvailable,
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/menu/${menuItemId}/availability`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ menuItemId, available: !currentAvailable }),
       });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
       setMenuItems((prev) =>
         prev.map((item) =>

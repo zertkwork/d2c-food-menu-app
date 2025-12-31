@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { Analytics } from "~backend/admin/get_analytics";
 import type { DailySalesData } from "~backend/admin/get_sales_trends";
 import type { HourlyOrderData } from "~backend/admin/get_peak_hours";
@@ -19,7 +19,10 @@ export default function ReportsTab() {
 
   const fetchAnalytics = async () => {
     try {
-      const data = await backend.admin.getAnalytics();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/analytics`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setAnalytics(data);
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
@@ -33,7 +36,10 @@ export default function ReportsTab() {
 
   const fetchTrends = async () => {
     try {
-      const data = await backend.admin.getSalesTrends({ days: trendDays });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/analytics/sales-trends?days=${encodeURIComponent(trendDays)}`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setSalesTrends(data.trends);
     } catch (error) {
       console.error("Failed to fetch sales trends:", error);
@@ -42,7 +48,10 @@ export default function ReportsTab() {
 
   const fetchPeakHours = async () => {
     try {
-      const data = await backend.admin.getPeakHours({ days: 30 });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/analytics/peak-hours?days=30`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setPeakHours(data.hourlyData);
     } catch (error) {
       console.error("Failed to fetch peak hours:", error);
@@ -51,7 +60,10 @@ export default function ReportsTab() {
 
   const fetchPopularItems = async () => {
     try {
-      const data = await backend.admin.getPopularItems({ days: 30, topN: 10 });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/analytics/popular-items?days=30&topN=10`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setPopularItems(data.overall);
     } catch (error) {
       console.error("Failed to fetch popular items:", error);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch + EventSource
 import { ChefHat, Clock, CheckCircle2, Package } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -27,10 +27,13 @@ export default function KitchenDisplayPage() {
 
     const connectToStream = async () => {
       try {
-        stream = await backend.kitchen.streamOrders();
-
-        for await (const update of stream) {
-          if (!isConnected) break;
+        const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+        const url = `${baseUrl}/kitchen/stream`;
+        const es = new EventSource(url, { withCredentials: true } as any);
+        stream = es;
+        es.onmessage = (e) => {
+          if (!isConnected) return;
+          const update = JSON.parse(e.data);
 
           const orderData: KitchenOrder = {
             orderId: update.orderId,
@@ -64,7 +67,13 @@ export default function KitchenDisplayPage() {
               description: `Order ${update.trackingId} from ${update.customerName}`,
             });
           }
-        }
+        };
+        es.onerror = () => {
+          if (isConnected) {
+            es.close();
+            setTimeout(connectToStream, 3000);
+          }
+        };
       } catch (error) {
         console.error("Stream error:", error);
         if (isConnected) {
@@ -85,7 +94,13 @@ export default function KitchenDisplayPage() {
 
   const updateKitchenStatus = async (orderId: number, kitchenStatus: "pending" | "preparing" | "ready" | "completed") => {
     try {
-      await backend.kitchen.updateStatus({ orderId, kitchenStatus });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      await fetch(`${baseUrl}/kitchen/orders/${orderId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ orderId, kitchenStatus }),
+      }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); });
     } catch (error) {
       console.error("Failed to update kitchen status:", error);
       toast({

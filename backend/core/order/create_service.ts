@@ -1,4 +1,4 @@
-import db from "../../db";
+import db from "../../db/index.ts";
 
 export interface OrderItem {
   menuItemId: number;

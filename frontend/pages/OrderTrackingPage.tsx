@@ -15,7 +15,8 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch + EventSource
+
 import type { Order } from "~backend/order/track";
 
 type OrderStatus = "received" | "preparing" | "out_for_delivery" | "delivered";
@@ -76,20 +77,32 @@ export default function OrderTrackingPage() {
 
       const connectToStream = async () => {
         try {
-          stream = await backend.order.streamStatus({ trackingId });
-
-          for await (const update of stream) {
-            if (!isConnected) break;
-
-            setOrder((prev) => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                orderStatus: update.orderStatus,
-                estimatedDeliveryMinutes: update.estimatedDeliveryMinutes ?? prev.estimatedDeliveryMinutes,
-              };
-            });
-          }
+          const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const url = `${baseUrl}/orders/${encodeURIComponent(trackingId)}/stream`;
+      const es = new EventSource(url);
+      stream = es;
+      es.onmessage = (e) => {
+        if (!isConnected) return;
+        try {
+          const update = JSON.parse(e.data);
+          setOrder((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              orderStatus: update.orderStatus,
+              estimatedDeliveryMinutes: update.estimatedDeliveryMinutes ?? prev.estimatedDeliveryMinutes,
+            };
+          });
+        } catch (err) {
+          console.error("Failed to parse stream update:", err);
+        }
+      };
+      es.onerror = () => {
+        if (isConnected) {
+          es.close();
+          setTimeout(connectToStream, 3000);
+        }
+      };
         } catch (error) {
           console.error("Stream error:", error);
           if (isConnected) {
@@ -114,7 +127,10 @@ export default function OrderTrackingPage() {
 
     if (!silent) setLoading(true);
     try {
-      const orderData = await backend.order.track({ trackingId });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/orders/${encodeURIComponent(trackingId)}`);
+      if (!resp.ok) throw new Error(`Failed to load order: ${resp.status}`);
+      const orderData = await resp.json();
       setOrder(orderData);
       setError("");
     } catch (err: any) {
