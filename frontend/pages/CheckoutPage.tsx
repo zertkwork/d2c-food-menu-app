@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Package, MapPin, Phone, User, Loader2, CheckCircle } from "lucide-react";
 import { useCart, useCartActions } from "../contexts/CartContext";
-import backend from "~backend/client";
+import { createOrder } from "../src/api/orders";
 import { usePaystackPayment } from "react-paystack";
 import { formatNaira } from "../lib/currency";
 import { cn } from "../lib/utils";
@@ -97,7 +97,7 @@ export default function CheckoutPage() {
         total: item.total,
       }));
 
-      const response = await backend.order.create({
+      const response = await createOrder({
         customerName: formData.customerName,
         phone: formData.phone,
         deliveryAddress: formData.deliveryAddress,

@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import backend from "~backend/client";
-import type { UserInfo } from "~backend/auth/me";
+type UserInfo = {
+  id: string;
+  username: string;
+  role: string;
+};
 
 interface AuthContextType {
   user: UserInfo | null;
@@ -22,7 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const userInfo = await backend.auth.me();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/auth/me`, { credentials: 'include' });
+      if (!resp.ok) throw new Error('unauthenticated');
+      const userInfo: UserInfo = await resp.json();
       setUser(userInfo);
     } catch (err) {
       setUser(null);
@@ -32,17 +38,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (username: string, password: string) => {
-    const response = await backend.auth.login({ username, password });
-    setUser({
-      id: String(response.user.id),
-      username: response.user.username,
-      role: response.user.role,
+    const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+    const resp = await fetch(`${baseUrl}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: 'include',
+      body: JSON.stringify({ username, password }),
     });
+    if (!resp.ok) throw new Error(`Login failed: ${resp.status}`);
+    const data = await resp.json();
+    setUser({ id: String(data.user.id), username: data.user.username, role: data.user.role });
   };
 
   const logout = async () => {
     try {
-      await backend.auth.logout({});
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      await fetch(`${baseUrl}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

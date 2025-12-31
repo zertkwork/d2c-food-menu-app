@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { CustomerInsight, CustomerSegment } from "~backend/admin/get_customer_insights";
 import { Users, TrendingUp, UserCheck, UserPlus, Crown, Award, Star } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,7 +18,10 @@ export default function CustomersTab() {
 
   const fetchCustomerInsights = async () => {
     try {
-      const data = await backend.admin.getCustomerInsights();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/analytics/customer-insights`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setTopCustomers(data.topCustomers);
       setSegments(data.segments);
       setStats({

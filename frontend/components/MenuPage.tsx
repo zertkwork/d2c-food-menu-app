@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import backend from "~backend/client";
-import type { MenuItem } from "~backend/menu/list";
+type MenuItem = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  available: boolean;
+};
 import MenuItemCard from "./MenuItemCard";
 import { useCart, useCartActions } from "../contexts/CartContext";
 import { History } from "lucide-react";
@@ -22,7 +28,10 @@ export default function MenuPage() {
 
   const loadMenu = async () => {
     try {
-      const response = await backend.menu.list();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/menu`);
+      if (!resp.ok) throw new Error(`Failed to load menu: ${resp.status}`);
+      const response = await resp.json();
       setMenuItems(response.items);
     } catch (error) {
       console.error("Failed to load menu:", error);

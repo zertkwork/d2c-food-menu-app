@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import backend from "~backend/client";
+// Removed Encore client; using fetch
 import type { InventoryItem } from "~backend/admin/get_inventory";
 import { Package, AlertTriangle, Plus, Minus, Settings } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -17,7 +17,10 @@ export default function InventoryTab() {
 
   const fetchInventory = async () => {
     try {
-      const data = await backend.admin.getInventory();
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/inventory`, { credentials: "include" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
       setItems(data.items);
       setLowStockItems(data.lowStockItems);
     } catch (error) {
@@ -40,7 +43,14 @@ export default function InventoryTab() {
 
   const handleAdjustStock = async (menuItemId: number, adjustment: number) => {
     try {
-      await backend.admin.adjustStock({ menuItemId, adjustment });
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/inventory/${menuItemId}/adjust`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ menuItemId, adjustment }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       toast({
         title: "Success",
         description: `Stock ${adjustment > 0 ? 'increased' : 'decreased'} successfully`,
@@ -70,11 +80,18 @@ export default function InventoryTab() {
 
   const saveEditing = async (menuItemId: number) => {
     try {
-      await backend.admin.updateInventory({
-        menuItemId,
-        stockQuantity: editValues.stockQuantity,
-        lowStockThreshold: editValues.lowStockThreshold,
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL;
+      const resp = await fetch(`${baseUrl}/admin/inventory/${menuItemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          menuItemId,
+          stockQuantity: editValues.stockQuantity,
+          lowStockThreshold: editValues.lowStockThreshold,
+        }),
       });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       toast({
         title: "Success",
         description: "Inventory settings updated",
