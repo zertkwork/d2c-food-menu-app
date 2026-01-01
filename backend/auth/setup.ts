@@ -26,10 +26,12 @@ async function hashPassword(password: string): Promise<string> {
   });
 }
 
+import { env } from "../adapters/express/config/env";
+
 export const setup = api<SetupRequest, SetupResponse>(
   { method: "POST", path: "/auth/setup", expose: true },
   async (req) => {
-    const SETUP_SECRET = process.env.INITIAL_SETUP_SECRET; if (!SETUP_SECRET) throw new Error("Missing INITIAL_SETUP_SECRET"); if (req.setupSecret !== SETUP_SECRET) {
+    const SETUP_SECRET = env.INITIAL_SETUP_SECRET; if (!SETUP_SECRET) throw new Error("Missing INITIAL_SETUP_SECRET"); if (req.setupSecret !== SETUP_SECRET) {
       throw new Error("Invalid setup secret");
     }
 

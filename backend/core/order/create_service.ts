@@ -134,9 +134,9 @@ export async function createOrderService(
     },
     body: JSON.stringify({
       email: "customer@example.com",
-      amount: Math.round(req.total * 100),
-      reference: paystackReference,
-      callback_url: `${frontendUrl}/track-order/${trackingId}`,
+  amount: Math.round(req.total * 100),
+  reference: paystackReference,
+  callback_url: `${frontendUrl}/track-order/${trackingId}`,
       metadata: {
         orderId: orderRow.id,
         trackingId,
