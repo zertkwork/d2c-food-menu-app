@@ -21,6 +21,8 @@ export interface LoginResponse {
 
 // Secrets via env only; Encore config removed
 
+import { env } from "../adapters/express/config/env";
+
 export async function login(req: LoginRequest): Promise<LoginResponse> {
     const result = await loginService({
       username: req.username,
@@ -28,7 +30,7 @@ export async function login(req: LoginRequest): Promise<LoginResponse> {
       xForwardedFor: req.xForwardedFor as any,
       xRealIp: req.xRealIp as any,
       userAgent: req.userAgent as any,
-      jwtSecret: (() => { const v = process.env.JWT_SECRET; if (!v) throw new Error("Missing JWT_SECRET"); return v; })(),
+      jwtSecret: env.JWT_SECRET,
     });
     return result;
   }
