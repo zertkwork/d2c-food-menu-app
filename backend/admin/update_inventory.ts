@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -13,9 +13,7 @@ interface UpdateInventoryResponse {
   success: boolean;
 }
 
-export const updateInventory = api<UpdateInventoryRequest, UpdateInventoryResponse>(
-  { expose: true, method: "PUT", path: "/admin/inventory/:menuItemId", auth: true },
-  async (req) => {
+export async function updateInventory(req: UpdateInventoryRequest): Promise<UpdateInventoryResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -55,4 +53,4 @@ export const updateInventory = api<UpdateInventoryRequest, UpdateInventoryRespon
 
     return { success: true };
   }
-);
+

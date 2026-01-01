@@ -1,5 +1,3 @@
-import { SQLDatabase } from "encore.dev/storage/sqldb";
-
-export default new SQLDatabase("db", {
-  migrations: "./migrations",
-});
+// Use adapter-selected DB implementation; removes Encore runtime dependency
+import db from "../infra/db";
+export default db;

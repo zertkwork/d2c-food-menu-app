@@ -1,4 +1,3 @@
-import { api, APIError } from "encore.dev/api";
 import db from "../db";
 
 export interface OrderItem {
@@ -23,9 +22,7 @@ export interface Order {
   items: OrderItem[];
 }
 
-export const track = api(
-  { method: "GET", path: "/orders/:trackingId", expose: true, auth: false },
-  async ({ trackingId }: { trackingId: string }): Promise<Order> => {
+export async function track({ trackingId }: { trackingId: string }): Promise<Order> {
     const orderRow = await db.queryRow<{
       id: number;
       tracking_id: string;
@@ -43,7 +40,7 @@ export const track = api(
     `;
 
     if (!orderRow) {
-      throw APIError.notFound("Order not found");
+      throw new Error("Order not found");
     }
 
     const items = await db.queryAll<{
@@ -77,4 +74,4 @@ export const track = api(
       })),
     };
   }
-);
+

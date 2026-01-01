@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -13,9 +13,7 @@ interface AdjustStockResponse {
   newStockQuantity: number;
 }
 
-export const adjustStock = api<AdjustStockRequest, AdjustStockResponse>(
-  { expose: true, method: "POST", path: "/admin/inventory/:menuItemId/adjust", auth: true },
-  async (req) => {
+export async function adjustStock(req: AdjustStockRequest): Promise<AdjustStockResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -37,4 +35,4 @@ export const adjustStock = api<AdjustStockRequest, AdjustStockResponse>(
       newStockQuantity: result.stock_quantity,
     };
   }
-);
+

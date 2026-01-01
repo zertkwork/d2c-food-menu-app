@@ -4,13 +4,20 @@
   "type": "module",
   "packageManager": "bun",
   "scripts": {
-    "build": "cd ../frontend \u0026\u0026 bun install \u0026\u0026 npx vite build --outDir=../backend/frontend/dist"
+    "build": "cd ../frontend && bun install && npx vite build --outDir=../backend/frontend/dist"
   },
   "dependencies": {
-    "encore.dev": "^1.53.0"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.3.3",
+    "encore.dev": "^1.53.2"
   },
   "devDependencies": {
+    "encore.dev": "^1.53.2",
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.10.2",
     "typescript": "^5.8.3",
-    "@types/node": "^20.11.30"
+    "@types/node": "^20.11.30",
+    "@types/jsonwebtoken": "^9.0.10"
   }
 }

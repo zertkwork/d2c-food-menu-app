@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 import { deliveryStatusChangedTopic } from "../events/topics";
@@ -13,9 +13,7 @@ export interface UpdateDeliveryStatusResponse {
   success: boolean;
 }
 
-export const updateStatus = api(
-  { expose: true, method: "POST", path: "/delivery/orders/:orderId/status", auth: true },
-  async (req: UpdateDeliveryStatusRequest): Promise<UpdateDeliveryStatusResponse> => {
+export async function updateStatus(req: UpdateDeliveryStatusRequest): Promise<UpdateDeliveryStatusResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "delivery" && authData.role !== "admin") {
       throw new Error("Unauthorized: Delivery or admin access required");
@@ -60,4 +58,4 @@ export const updateStatus = api(
 
     return { success: true };
   }
-);
+

@@ -1,6 +1,5 @@
 import db from "../../db";
 import * as crypto from "crypto";
-import { orderCreatedTopic } from "../../events/topics";
 
 export async function handlePaystackWebhook(req: {
   event: string;
@@ -16,7 +15,17 @@ export async function handlePaystackWebhook(req: {
   };
   signature: string;
   paystackSecret: string;
-}): Promise<{ received: boolean }> {
+}): Promise<{
+  orderId: number;
+  trackingId: string;
+  status: 'received';
+  customerName: string;
+  phone: string;
+  deliveryAddress: string;
+  total: number;
+  items: { menuItemName: string; quantity: number; price: number }[];
+  timestamp: Date;
+} | null> {
   const eventData = {
     event: req.event,
     data: req.data,
@@ -75,10 +84,10 @@ export async function handlePaystackWebhook(req: {
           itemsResult.push(item);
         }
 
-        await orderCreatedTopic.publish({
+        const payload = {
           orderId: orderRow.id,
           trackingId: orderRow.tracking_id,
-          status: 'received',
+          status: 'received' as const,
           customerName: orderRow.customer_name,
           phone: orderRow.phone,
           deliveryAddress: orderRow.delivery_address,
@@ -89,12 +98,13 @@ export async function handlePaystackWebhook(req: {
             price: item.price,
           })),
           timestamp: new Date(),
-        });
+        };
 
         console.log(`Order payment confirmed: ${reference}`);
+        return payload;
       }
     }
   }
 
-  return { received: true };
+  return null;
 }

@@ -1,3 +1,2 @@
-import { Service } from "encore.dev/service";
-
-export default new Service("customer");
+// Encore Service removed at runtime
+export default {} as unknown as { name?: string };

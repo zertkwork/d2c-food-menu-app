@@ -1,5 +1,5 @@
-import { api, Cookie, Header } from "encore.dev/api";
-import { secret } from "encore.dev/config";
+// Encore runtime removed
+import type { Cookie, Header } from "encore.dev/api";
 import { loginService } from "../core/auth/login_service";
 
 export interface LoginRequest {
@@ -19,19 +19,17 @@ export interface LoginResponse {
   };
 }
 
-const jwtSecret = secret("JWTSecret");
+// Secrets via env only; Encore config removed
 
-export const login = api<LoginRequest, LoginResponse>(
-  { method: "POST", path: "/auth/login", expose: true },
-  async (req: LoginRequest) => {
+export async function login(req: LoginRequest): Promise<LoginResponse> {
     const result = await loginService({
       username: req.username,
       password: req.password,
       xForwardedFor: req.xForwardedFor as any,
       xRealIp: req.xRealIp as any,
       userAgent: req.userAgent as any,
-      jwtSecret: jwtSecret(),
+      jwtSecret: (() => { const v = process.env.JWT_SECRET; if (!v) throw new Error("Missing JWT_SECRET"); return v; })(),
     });
     return result;
   }
-);
+
