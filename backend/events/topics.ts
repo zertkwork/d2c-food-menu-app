@@ -1,4 +1,4 @@
-import { Topic } from "encore.dev/pubsub";
+// Removed Encore pubsub runtime; provide minimal topic shim for publish() calls
 
 export interface OrderEvent {
   orderId: number;
@@ -32,18 +32,9 @@ export interface DeliveryEvent {
   timestamp: Date;
 }
 
-export const orderCreatedTopic = new Topic<OrderEvent>("order-created", {
-  deliveryGuarantee: "at-least-once",
-});
+type TopicShim<T> = { publish: (event: T) => Promise<void> };
 
-export const orderStatusChangedTopic = new Topic<OrderEvent>("order-status-changed", {
-  deliveryGuarantee: "at-least-once",
-});
-
-export const kitchenStatusChangedTopic = new Topic<KitchenStatusEvent>("kitchen-status-changed", {
-  deliveryGuarantee: "at-least-once",
-});
-
-export const deliveryStatusChangedTopic = new Topic<DeliveryEvent>("delivery-status-changed", {
-  deliveryGuarantee: "at-least-once",
-});
+export const orderCreatedTopic: TopicShim<OrderEvent> = { async publish(_e) {} };
+export const orderStatusChangedTopic: TopicShim<OrderEvent> = { async publish(_e) {} };
+export const kitchenStatusChangedTopic: TopicShim<KitchenStatusEvent> = { async publish(_e) {} };
+export const deliveryStatusChangedTopic: TopicShim<DeliveryEvent> = { async publish(_e) {} };

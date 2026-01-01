@@ -1,4 +1,3 @@
-import { api } from "encore.dev/api";
 import db from "../db";
 
 export interface OrderHistoryItem {
@@ -31,9 +30,7 @@ export interface GetOrderHistoryResponse {
   totalSpent: number;
 }
 
-export const getOrderHistory = api(
-  { method: "GET", path: "/customer/order-history/:phone", expose: true },
-  async ({ phone }: GetOrderHistoryRequest): Promise<GetOrderHistoryResponse> => {
+export async function getOrderHistory({ phone }: GetOrderHistoryRequest): Promise<GetOrderHistoryResponse> {
     const orders = await db.queryAll<{
       id: number;
       tracking_id: string;
@@ -108,4 +105,3 @@ export const getOrderHistory = api(
       totalSpent,
     };
   }
-);

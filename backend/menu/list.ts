@@ -1,4 +1,3 @@
-import { api } from "encore.dev/api";
 import { listAvailableMenuItems } from "../core/menu/service";
 
 export interface MenuItem {
@@ -15,10 +14,7 @@ interface ListMenuResponse {
 }
 
 // Lists all available menu items.
-export const list = api<void, ListMenuResponse>(
-  { expose: true, method: "GET", path: "/menu" },
-  async () => {
+export async function list(): Promise<ListMenuResponse> {
     const items = await listAvailableMenuItems();
     return { items };
   }
-);

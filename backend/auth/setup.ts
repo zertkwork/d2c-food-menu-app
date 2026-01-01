@@ -1,9 +1,8 @@
 import { api } from "encore.dev/api";
-import { secret } from "encore.dev/config";
 import db from "../db";
 import crypto from "crypto";
 
-const setupSecret = secret("InitialSetupSecret");
+// Secrets via env only; Encore config removed
 
 export interface SetupRequest {
   setupSecret: string;
@@ -30,7 +29,7 @@ async function hashPassword(password: string): Promise<string> {
 export const setup = api<SetupRequest, SetupResponse>(
   { method: "POST", path: "/auth/setup", expose: true },
   async (req) => {
-    if (req.setupSecret !== setupSecret()) {
+    const SETUP_SECRET = process.env.INITIAL_SETUP_SECRET; if (!SETUP_SECRET) throw new Error("Missing INITIAL_SETUP_SECRET"); if (req.setupSecret !== SETUP_SECRET) {
       throw new Error("Invalid setup secret");
     }
 

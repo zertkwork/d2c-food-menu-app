@@ -1,8 +1,8 @@
-import { Subscription } from "encore.dev/pubsub";
+// Encore runtime removed
 import { orderCreatedTopic, kitchenStatusChangedTopic } from "../events/topics";
 import db from "../db";
 
-new Subscription(orderCreatedTopic, "route-to-kitchen", {
+/* Subscription removed at runtime: route-to-kitchen {
   handler: async (event) => {
     const orderItems = await db.queryAll<{
       menu_item_id: number;
@@ -29,9 +29,9 @@ new Subscription(orderCreatedTopic, "route-to-kitchen", {
     
     console.log(`Order ${event.trackingId} routed to kitchen and inventory updated`);
   },
-});
+*/
 
-new Subscription(kitchenStatusChangedTopic, "handle-kitchen-ready", {
+/* Subscription removed at runtime: handle-kitchen-ready {
   handler: async (event) => {
     if (event.kitchenStatus === "ready") {
       await db.exec`
@@ -43,4 +43,4 @@ new Subscription(kitchenStatusChangedTopic, "handle-kitchen-ready", {
       console.log(`Order ${event.trackingId} ready for delivery`);
     }
   },
-});
+*/

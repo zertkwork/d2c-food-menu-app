@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -25,9 +25,7 @@ interface GetPopularItemsResponse {
   daily: DailyPopularityData[];
 }
 
-export const getPopularItems = api<GetPopularItemsRequest, GetPopularItemsResponse>(
-  { expose: true, method: "GET", path: "/admin/analytics/popular-items", auth: true },
-  async (req) => {
+export async function getPopularItems(req: GetPopularItemsRequest): Promise<GetPopularItemsResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -114,4 +112,4 @@ export const getPopularItems = api<GetPopularItemsRequest, GetPopularItemsRespon
 
     return { overall, daily };
   }
-);
+

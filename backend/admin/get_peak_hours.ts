@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -16,9 +16,7 @@ interface GetPeakHoursResponse {
   hourlyData: HourlyOrderData[];
 }
 
-export const getPeakHours = api<GetPeakHoursRequest, GetPeakHoursResponse>(
-  { expose: true, method: "GET", path: "/admin/analytics/peak-hours", auth: true },
-  async (req) => {
+export async function getPeakHours(req: GetPeakHoursRequest): Promise<GetPeakHoursResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "admin") {
       throw new Error("Unauthorized: Admin access required");
@@ -52,4 +50,4 @@ export const getPeakHours = api<GetPeakHoursRequest, GetPeakHoursResponse>(
 
     return { hourlyData };
   }
-);
+

@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 import crypto from "crypto";
@@ -50,9 +50,7 @@ function validateUsername(username: string): void {
   }
 }
 
-export const register = api<RegisterUserRequest, RegisterUserResponse>(
-  { method: "POST", path: "/auth/register", expose: true, auth: true },
-  async (req) => {
+export async function register(req: RegisterUserRequest): Promise<RegisterUserResponse> {
     const authData = getAuthData()!;
     
     if (authData.role !== "admin") {
@@ -84,4 +82,4 @@ export const register = api<RegisterUserRequest, RegisterUserResponse>(
       role: req.role,
     };
   }
-);
+

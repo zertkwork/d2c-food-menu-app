@@ -31,10 +31,12 @@ app.post('/orders', validate(createOrderSchema), async (req: any, res: any, next
       throw new Error('Missing PAYSTACK_SECRET_KEY');
     }
 
-    // Lazy import to avoid resolving core/db when stub mode is enabled
-    const { createOrderService } = await import('../../core/order/create_service.ts');
+  // Lazy import to avoid resolving core/db when stub mode is enabled
+  const { createOrderService } = await import('../../core/order/create_service.ts');
+  // Adapter provides DB implementation to core; import lazily to honor ADAPTER_STUB_DB
+  const db = (await import('../../db/index.ts')).default;
 
-    const result = await createOrderService(body, paystackSecret);
+  const result = await createOrderService(body, paystackSecret, db);
     res.json(result);
   } catch (err) {
     return next(err);

@@ -1,4 +1,5 @@
-import { api, Header, Cookie } from "encore.dev/api";
+// Encore runtime removed
+import type { Header, Cookie } from "encore.dev/api";
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -7,9 +8,7 @@ interface LogoutRequest {
   session?: Cookie<"session">;
 }
 
-export const logout = api<LogoutRequest, { success: boolean }>(
-  { method: "POST", path: "/auth/logout", expose: true, auth: true },
-  async (req: LogoutRequest) => {
+export async function logout(req: LogoutRequest): Promise<{ success: boolean }> {
     const authData = getAuthData()!;
     const token = req.authorization?.replace("Bearer ", "") ?? req.session;
     
@@ -22,4 +21,4 @@ export const logout = api<LogoutRequest, { success: boolean }>(
 
     return { success: true };
   }
-);
+

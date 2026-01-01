@@ -18,16 +18,29 @@ function getTokenFromHeadersOrCookie(req: Request): string | null {
   return null;
 }
 
-export function authMiddleware(req: Request, _res: Response, next: NextFunction) {
+export async function authMiddleware(req: Request, _res: Response, next: NextFunction) {
   try {
     const token = getTokenFromHeadersOrCookie(req);
-    if (!token) return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
+    if (!token) {
+      return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
+    }
+
     const secret = process.env.JWT_SECRET;
-    if (!secret) return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
-    const decoded = jwt.verify(token, secret);
+    if (!secret) {
+      return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
+    }
+
+    // Verify token and attach decoded payload
+    let decoded: unknown;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (e) {
+      return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
+    }
+
     (req as any).user = decoded;
     return next();
-  } catch {
+  } catch (err) {
     return next(new ApiError('Unauthorized', 401, 'UNAUTHORIZED'));
   }
 }

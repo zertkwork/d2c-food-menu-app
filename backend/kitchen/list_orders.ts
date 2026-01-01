@@ -1,4 +1,4 @@
-import { api } from "encore.dev/api";
+// Encore runtime removed
 import { getAuthData } from "~encore/auth";
 import db from "../db";
 
@@ -21,9 +21,7 @@ export interface ListKitchenOrdersResponse {
   orders: KitchenOrder[];
 }
 
-export const listOrders = api(
-  { expose: true, method: "GET", path: "/kitchen/orders", auth: true },
-  async (): Promise<ListKitchenOrdersResponse> => {
+export async function listOrders(): Promise<ListKitchenOrdersResponse> {
     const authData = getAuthData()!;
     if (authData.role !== "kitchen" && authData.role !== "admin") {
       throw new Error("Unauthorized: Kitchen or admin access required");
@@ -89,4 +87,4 @@ export const listOrders = api(
 
     return { orders: kitchenOrders };
   }
-);
+
