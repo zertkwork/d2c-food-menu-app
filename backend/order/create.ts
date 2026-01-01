@@ -28,8 +28,13 @@ export interface CreateOrderResponse {
 // Secrets via env only; Encore config removed
 
 import db from "../db";
+import { env } from "../adapters/express/config/env";
 
 export async function create(req: CreateOrderRequest): Promise<CreateOrderResponse> {
-    return await createOrderService(req, (() => { const v = process.env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })(), db);
-  }
+  const paystackSecret = env.PAYSTACK_SECRET_KEY;
+  const frontendUrl = env.FRONTEND_URL;
+  const paymentMode = env.PAYMENT_MODE;
+
+  return await createOrderService(req, paystackSecret, frontendUrl, paymentMode, db);
+}
 

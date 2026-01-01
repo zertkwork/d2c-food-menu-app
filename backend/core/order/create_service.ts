@@ -52,9 +52,15 @@ async function getOrCreateCustomerProfile(db: DBPort, phone: string, customerNam
   return newProfile.id;
 }
 
-export async function createOrderService(req: CreateOrderRequest, paystackSecret: string, db: DBPort): Promise<CreateOrderResponse> {
+export async function createOrderService(
+  req: CreateOrderRequest,
+  paystackSecret: string,
+  frontendUrl: string,
+  paymentModeEnv: string | undefined,
+  db: DBPort
+): Promise<CreateOrderResponse> {
   const trackingId = generateTrackingId();
-  const paymentMode = (process.env.PAYMENT_MODE || '').toLowerCase() === 'stub' ? 'stub' : 'live';
+  const paymentMode = (paymentModeEnv || '').toLowerCase() === 'stub' ? 'stub' : 'live';
   const paystackReference = paymentMode === 'stub'
     ? `stub_ref_${Date.now()}`
     : `ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -131,7 +137,7 @@ export async function createOrderService(req: CreateOrderRequest, paystackSecret
       email: "customer@example.com",
       amount: Math.round(req.total * 100),
       reference: paystackReference,
-      callback_url: `${process.env.FRONTEND_URL || "https://proj-d411cgs82vjh7nmv7am0.lp.dev"}/track-order/${trackingId}`,
+      callback_url: `${frontendUrl || "https://proj-d411cgs82vjh7nmv7am0.lp.dev"}/track-order/${trackingId}`,
       metadata: {
         orderId: orderRow.id,
         trackingId,

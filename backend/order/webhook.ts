@@ -2,6 +2,7 @@
 import type { Header } from "encore.dev/api";
 import { handlePaystackWebhook } from "../core/order/webhook_service";
 import { orderCreatedTopic } from "../events/topics";
+import { env } from "../adapters/express/config/env";
 
 // Secrets via env only; Encore config removed
 
@@ -25,7 +26,7 @@ export async function webhook(req: PaystackWebhookRequest): Promise<{ received: 
       event: req.event,
       data: req.data,
       signature: req.signature as any,
-      paystackSecret: (() => { const v = process.env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })(),
+      paystackSecret: ((): string => { const v = env.PAYSTACK_SECRET_KEY; if (!v) throw new Error("Missing PAYSTACK_SECRET_KEY"); return v; })(),
     });
 
     if (payload) {
