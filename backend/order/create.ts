@@ -35,4 +35,3 @@ export async function create(req: CreateOrderRequest): Promise<CreateOrderRespon
   const paymentMode = process.env.PAYMENT_MODE;
   return await createOrderService(req, paystackSecret, db, frontendUrl, paymentMode);
 }
-

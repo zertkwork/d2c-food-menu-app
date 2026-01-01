@@ -8,12 +8,11 @@ export function errorMiddleware(err: unknown, _req: Request, res: Response, _nex
   let message = 'Internal server error';
 
   if (isApiError(err)) {
-    const anyErr: any = err;
-    status = Number.isInteger(anyErr.status) ? anyErr.status : 500;
-    code = anyErr.code;
-    if (typeof anyErr.message === 'string' && anyErr.message.trim()) {
-      message = anyErr.message;
-    }
+    status = Number.isInteger((err as any).status) ? (err as any).status : 500;
+    code = (err as any).code;
+    message = typeof (err as any).message === 'string' && (err as any).message.trim().length > 0
+      ? (err as any).message
+      : 'Internal server error';
   }
 
   // Always log full error server-side
